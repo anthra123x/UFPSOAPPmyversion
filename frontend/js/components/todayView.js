@@ -58,6 +58,19 @@ export const TodayView = {
     const dateStr = container.querySelector('#today-date-str');
     const countBadge = container.querySelector('#today-classes-count');
 
+    // 1. Mostrar caché instantánea (0ms) si existe y no estamos simulando
+    const isSimulating = simParams.weekday !== null || simParams.timeSim;
+    if (!isSimulating) {
+      const cached = api.getCachedToday();
+      if (cached) {
+        this.currentScheduleData = cached;
+        countBadge.textContent = `${cached.total_classes} ${cached.total_classes === 1 ? 'clase' : 'clases'}`;
+        this.renderHero(heroContainer, cached);
+        this.renderTimeline(timelineContainer, cached.classes);
+      }
+    }
+
+    // 2. Refrescar desde el backend en tiempo real
     try {
       const data = await api.getTodaySchedule(simParams.weekday, simParams.timeSim);
       this.currentScheduleData = data;
@@ -67,7 +80,7 @@ export const TodayView = {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const formattedDate = now.toLocaleDateString('es-CO', options);
       
-      if (simParams.weekday !== null || simParams.timeSim) {
+      if (isSimulating) {
         dateStr.innerHTML = `<span class="sim-pill">Modo Simulación: ${data.day_name} ${data.current_time}</span>`;
       } else {
         dateStr.textContent = `${data.day_name}, ${formattedDate} · ${data.current_time}`;
@@ -82,22 +95,24 @@ export const TodayView = {
       this.renderTimeline(timelineContainer, data.classes);
 
     } catch (err) {
-      heroContainer.classList.remove('skeleton-block');
-      heroContainer.innerHTML = `
-        <div class="empty-state">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <div class="empty-title">Aún no hay horario importado</div>
-          <p class="empty-desc">Para ver tus clases de hoy, sube tu archivo PDF descargado del portal SIA de la UFPSO.</p>
-          <button class="btn btn-primary btn-sm" onclick="window.app.switchTab('import')">
-            Importar Horario PDF
-          </button>
-        </div>
-      `;
-      timelineContainer.innerHTML = '';
+      if (!this.currentScheduleData) {
+        heroContainer.classList.remove('skeleton-block');
+        heroContainer.innerHTML = `
+          <div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div class="empty-title">Aún no hay horario importado</div>
+            <p class="empty-desc">Para ver tus clases de hoy, sube tu archivo PDF descargado del portal SIA de la UFPSO.</p>
+            <button class="btn btn-primary btn-sm" onclick="window.app.switchTab('import')">
+              Importar Horario PDF
+            </button>
+          </div>
+        `;
+        timelineContainer.innerHTML = '';
+      }
     }
   },
 

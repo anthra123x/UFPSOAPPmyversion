@@ -77,6 +77,14 @@ async def upload_schedule_pdf(
                 slots=[s for s in enr.slots]
             ))
             
+        # Generar token JWT automático para que la app quede autenticada inmediatamente
+        from app.services.auth_service import create_access_token
+        from app.services.cache_service import cache
+        token = create_access_token({"sub": student.code, "id": student.id})
+        
+        # Invalidar caché previa de este estudiante
+        cache.delete_prefix(f"schedule:{student.id}")
+        
         return ScheduleUploadSummary(
             student=StudentOut.model_validate(student),
             academic_period=result["period"].name,
@@ -84,6 +92,8 @@ async def upload_schedule_pdf(
             slots_created=result["slots_count"],
             professors_linked=result["professors_count"],
             courses=enrollments_out,
+            access_token=token,
+            token_type="bearer",
             message="Horario del SIA importado y sincronizado exitosamente con salones enriquecidos."
         )
     except Exception as e:

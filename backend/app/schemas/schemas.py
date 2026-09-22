@@ -141,6 +141,8 @@ class ScheduleUploadSummary(BaseModel):
     slots_created: int
     professors_linked: int
     courses: List[EnrollmentOut]
+    access_token: Optional[str] = None
+    token_type: str = "bearer"
     message: str
 
 # --- TASK SCHEMAS ---

@@ -1,22 +1,19 @@
 /**
  * UFPSO Horarios & Gestión Académica - API Client
- * Cliente REST modular sin dependencias externas
+ * Cliente REST modular de ultra-alta velocidad con soporte Stale-While-Revalidate
  */
 
-// Base URL adaptativa: Si corre en navegador normal usa '/api/v1'.
-// Si corre en APK nativo (file:// o https://appassets.androidplatform.net), usa la IP local del backend
 export const getApiBase = () => {
   const custom = localStorage.getItem('ufpso_api_base');
   if (custom) return custom.endsWith('/api/v1') ? custom : `${custom.replace(/\/$/, '')}/api/v1`;
   if (typeof window !== 'undefined' && 
       window.location.protocol.startsWith('http') && 
       !window.location.hostname.includes('androidplatform.net')) {
-    return '/api/v1';
+    return `${window.location.origin}/api/v1`;
   }
   return 'http://10.81.48.45:8000/api/v1';
 };
 
-const API_BASE = getApiBase();
 const TOKEN_STORAGE_KEY = 'ufpso_auth_token';
 const STUDENT_STORAGE_KEY = 'ufpso_student_profile';
 
@@ -56,7 +53,8 @@ export const AuthStore = {
 };
 
 async function request(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`;
+  const base = getApiBase();
+  const url = `${base}${endpoint}`;
   const headers = options.headers || {};
 
   const token = AuthStore.getToken();
@@ -64,7 +62,12 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Si no es FormData, agregamos application/json por defecto
+  // Encabezado redundante de resiliencia
+  const student = AuthStore.getStudent();
+  if (student?.code) {
+    headers['X-Student-Code'] = student.code;
+  }
+
   if (!(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
@@ -121,7 +124,25 @@ export const api = {
     AuthStore.clear();
   },
 
-  // Horarios
+  // Horarios con Caché Local Instantánea (Stale-While-Revalidate)
+  getCachedToday() {
+    try {
+      const raw = localStorage.getItem('ufpso_cached_today');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  getCachedWeek() {
+    try {
+      const raw = localStorage.getItem('ufpso_cached_week');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+
   async getTodaySchedule(weekday = null, timeSim = null) {
     const params = new URLSearchParams();
     if (weekday !== null && weekday !== undefined && weekday !== '') {
@@ -131,11 +152,19 @@ export const api = {
       params.append('time_sim', timeSim);
     }
     const query = params.toString() ? `?${params.toString()}` : '';
-    return request(`/schedule/today${query}`);
+    const data = await request(`/schedule/today${query}`);
+    if (data && (!weekday && !timeSim)) {
+      localStorage.setItem('ufpso_cached_today', JSON.stringify(data));
+    }
+    return data;
   },
 
   async getWeekSchedule() {
-    return request('/schedule/week');
+    const data = await request('/schedule/week');
+    if (data) {
+      localStorage.setItem('ufpso_cached_week', JSON.stringify(data));
+    }
+    return data;
   },
 
   async getCurrentEnrollments() {
@@ -162,9 +191,19 @@ export const api = {
       method: 'POST',
       body: formData
     });
+    
+    // Guardar automáticamente el token y estudiante emitidos por el backend
+    if (res?.access_token) {
+      AuthStore.setToken(res.access_token);
+    }
     if (res?.student) {
       AuthStore.setStudent(res.student);
     }
+
+    // Invalidar cachés locales para refresco total inmediato
+    localStorage.removeItem('ufpso_cached_today');
+    localStorage.removeItem('ufpso_cached_week');
+
     return res;
   },
 

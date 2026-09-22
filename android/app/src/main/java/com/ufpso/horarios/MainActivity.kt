@@ -17,6 +17,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
 
+    private val liveServerUrl = "http://10.81.48.45:8000/"
+    private val localFallbackUrl = "https://appassets.androidplatform.net/assets/web/index.html"
+    private var isUsingFallback = false
+
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -81,6 +85,12 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     super.onReceivedError(view, request, error)
                     swipeRefresh.isRefreshing = false
+                    // Si el servidor en vivo no responde (ej. sin red local), cargar fallback local empaquetado
+                    val failingUrl = request?.url?.toString() ?: ""
+                    if (!isUsingFallback && failingUrl.startsWith(liveServerUrl)) {
+                        isUsingFallback = true
+                        webView.loadUrl(localFallbackUrl)
+                    }
                 }
             }
 
@@ -105,14 +115,14 @@ class MainActivity : AppCompatActivity() {
 
         swipeRefresh.addView(webView)
         swipeRefresh.setOnRefreshListener {
-            webView.reload()
+            isUsingFallback = false
+            webView.loadUrl(liveServerUrl)
         }
 
         setContentView(swipeRefresh)
 
-        // Cargar el frontend a través del origen HTTPS virtual de WebViewAssetLoader
-        val secureAssetUrl = "https://appassets.androidplatform.net/assets/web/index.html"
-        webView.loadUrl(secureAssetUrl)
+        // Cargar preferentemente desde el servidor en vivo para que los cambios se reflejen de inmediato
+        webView.loadUrl(liveServerUrl)
     }
 
     @Deprecated("Deprecated in Java")

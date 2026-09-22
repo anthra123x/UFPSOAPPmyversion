@@ -29,3 +29,8 @@ htmlcov/
 # Archivos de respaldo y temporales
 scratch/
 *.log
+android/.gradle/
+android/app/build/
+android/build/
+.gradle/
+
