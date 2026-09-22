@@ -9,6 +9,7 @@ import android.webkit.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.webkit.WebViewAssetLoader
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,6 +45,11 @@ class MainActivity : AppCompatActivity() {
             setColorSchemeColors(android.graphics.Color.parseColor("#DC2626"))
         }
 
+        // Configurar WebViewAssetLoader para servir assets locales bajo origen seguro HTTPS
+        val assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -53,10 +59,27 @@ class MainActivity : AppCompatActivity() {
             settings.useWideViewPort = true
             settings.databaseEnabled = true
             settings.cacheMode = WebSettings.LOAD_DEFAULT
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
             webViewClient = object : WebViewClient() {
+                override fun shouldInterceptRequest(
+                    view: WebView,
+                    request: WebResourceRequest
+                ): WebResourceResponse? {
+                    return assetLoader.shouldInterceptRequest(request.url)
+                }
+
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
+                    swipeRefresh.isRefreshing = false
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
                     swipeRefresh.isRefreshing = false
                 }
             }
@@ -87,9 +110,9 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(swipeRefresh)
 
-        // Cargar frontend empaquetado o servidor local
-        val localAssetUrl = "file:///android_asset/web/index.html"
-        webView.loadUrl(localAssetUrl)
+        // Cargar el frontend a través del origen HTTPS virtual de WebViewAssetLoader
+        val secureAssetUrl = "https://appassets.androidplatform.net/assets/web/index.html"
+        webView.loadUrl(secureAssetUrl)
     }
 
     @Deprecated("Deprecated in Java")

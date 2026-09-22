@@ -3,11 +3,14 @@
  * Cliente REST modular sin dependencias externas
  */
 
-// Base URL adaptativa: Si corre en navegador usa '/api/v1', si corre en APK nativo (file://) usa la IP local del backend
-const getApiBase = () => {
+// Base URL adaptativa: Si corre en navegador normal usa '/api/v1'.
+// Si corre en APK nativo (file:// o https://appassets.androidplatform.net), usa la IP local del backend
+export const getApiBase = () => {
   const custom = localStorage.getItem('ufpso_api_base');
-  if (custom) return custom;
-  if (typeof window !== 'undefined' && window.location.protocol.startsWith('http')) {
+  if (custom) return custom.endsWith('/api/v1') ? custom : `${custom.replace(/\/$/, '')}/api/v1`;
+  if (typeof window !== 'undefined' && 
+      window.location.protocol.startsWith('http') && 
+      !window.location.hostname.includes('androidplatform.net')) {
     return '/api/v1';
   }
   return 'http://10.81.48.45:8000/api/v1';

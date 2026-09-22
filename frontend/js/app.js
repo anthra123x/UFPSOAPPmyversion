@@ -33,11 +33,30 @@ class App {
     this.initAuthModal();
     this.initSimControls();
 
-    // Comprobar autenticación existente o auto-login con código por defecto
-    await this.checkAuth();
+    // Soporte para parámetros de URL (?tab=week, ?sim=jueves-0615)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab') || window.location.hash.replace('#', '');
+    const simParam = urlParams.get('sim');
 
-    // Renderizar pestaña inicial
+    if (simParam) {
+      const simSelect = document.getElementById('sim-time-select');
+      if (simSelect) {
+        simSelect.value = simParam;
+        simSelect.dispatchEvent(new Event('change'));
+      }
+    }
+
+    if (tabParam && this.views[tabParam]) {
+      this.activeTab = tabParam;
+    }
+
+    // Renderizar pestaña inicial INMEDIATAMENTE (sin bloquear la interfaz)
     this.switchTab(this.activeTab);
+
+    // Comprobar autenticación en segundo plano
+    this.checkAuth().catch(err => {
+      console.warn('Verificación de sesión:', err.message);
+    });
   }
 
   // --- TEMA (DARK / LIGHT) ---
@@ -154,8 +173,12 @@ class App {
     const openModal = () => {
       const current = AuthStore.getStudent();
       const codeInput = document.getElementById('login-student-code');
+      const urlInput = document.getElementById('login-server-url');
       if (codeInput && current) {
         codeInput.value = current.code;
+      }
+      if (urlInput) {
+        urlInput.value = localStorage.getItem('ufpso_api_base') || 'http://10.81.48.45:8000/api/v1';
       }
       modal.classList.remove('hidden');
     };
@@ -169,6 +192,13 @@ class App {
       e.preventDefault();
       const code = document.getElementById('login-student-code').value.trim();
       const pwd = document.getElementById('login-student-pwd').value.trim();
+      const serverUrl = document.getElementById('login-server-url')?.value.trim();
+
+      if (serverUrl) {
+        const cleanUrl = serverUrl.endsWith('/api/v1') ? serverUrl : `${serverUrl.replace(/\/$/, '')}/api/v1`;
+        localStorage.setItem('ufpso_api_base', cleanUrl);
+      }
+
       if (!code) return;
 
       const submitBtn = form.querySelector('button[type="submit"]');
