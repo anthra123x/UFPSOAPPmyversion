@@ -6,7 +6,7 @@ Plataforma integral y minimalista para estudiantes de la **Universidad Francisco
 
 ## 🌟 Características Principales
 
-### 🖥️ Frontend Moderno & Editorial ("Anti-AI Minimalist")
+### 🖥️ Frontend Moderno & Editorial
 - **Diseño limpio y enfocado**: Sin saturación visual, sin gradientes morados genéricos ni tarjetas infladas con sombras excesivas. Interfaz tipográfica de alta legibilidad basada en *Inter* y números tabulares (`tabular-nums`).
 - **Vista Hoy**: Resalta la clase activa en curso o la próxima clase con cuenta regresiva en minutos (`Termina en 45 min` / `Empieza en 20 min`), junto con la agenda cronológica del día.
 - **Vista Semana**: Cuadrícula horaria completa (Lunes a Sábado de 06:00 a 22:00) y modo agenda por días con conteo de horas semanales.
