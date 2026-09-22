@@ -50,9 +50,14 @@ async def get_current_student(
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             student_code: str = payload.get("sub")
             if student_code:
+                from app.services.cache_service import cache
+                cached_student = cache.get(f"auth:student:{student_code}")
+                if cached_student:
+                    return cached_student
                 result = await db.execute(select(Student).where(Student.code == student_code))
                 student = result.scalar_one_or_none()
                 if student:
+                    cache.set(f"auth:student:{student_code}", student, ttl_seconds=120)
                     return student
         except JWTError:
             pass
@@ -60,14 +65,26 @@ async def get_current_student(
     # 2. Intentar validar mediante encabezado directo X-Student-Code
     x_code = request.headers.get("X-Student-Code")
     if x_code and x_code.strip():
-        result = await db.execute(select(Student).where(Student.code == x_code.strip()))
+        clean_code = x_code.strip()
+        from app.services.cache_service import cache
+        cached_student = cache.get(f"auth:student:{clean_code}")
+        if cached_student:
+            return cached_student
+        result = await db.execute(select(Student).where(Student.code == clean_code))
         student = result.scalar_one_or_none()
         if student:
+            cache.set(f"auth:student:{clean_code}", student, ttl_seconds=120)
             return student
 
     # 3. Fallback inteligente: buscar el último estudiante registrado/activo
+    from app.services.cache_service import cache
+    cached_last = cache.get("auth:student:latest")
+    if cached_last:
+        return cached_last
     result = await db.execute(select(Student).order_by(Student.id.desc()).limit(1))
     student = result.scalar_one_or_none()
+    if student:
+        cache.set("auth:student:latest", student, ttl_seconds=120)
     return student
 
 async def get_required_student(

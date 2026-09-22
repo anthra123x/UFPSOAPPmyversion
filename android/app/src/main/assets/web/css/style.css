@@ -193,10 +193,11 @@ button, input, select, textarea {
   font-size: 13px;
 }
 
-/* Live Clock */
+/* Live Clock & Sync */
 .header-center {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .live-clock-badge {
@@ -209,6 +210,46 @@ button, input, select, textarea {
   border: 1px solid var(--border);
   padding: 4px 10px;
   border-radius: var(--radius-full);
+}
+
+.live-sync-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #10B981;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.live-sync-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #10B981;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #10B981;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+.live-sync-indicator.sync--offline {
+  color: #F59E0B;
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.live-sync-indicator.sync--offline .live-sync-dot {
+  background-color: #F59E0B;
+  box-shadow: 0 0 6px #F59E0B;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
 }
 
 .live-clock-badge.clock--simulated {

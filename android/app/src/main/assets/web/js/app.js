@@ -29,6 +29,7 @@ class App {
   async init() {
     this.initTheme();
     this.initClock();
+    this.initSyncMonitor();
     this.initNavigation();
     this.initAuthModal();
     this.initSimControls();
@@ -94,6 +95,32 @@ class App {
     };
     updateClock();
     setInterval(updateClock, 1000);
+  }
+
+  // --- MONITOREO DE CONEXIÓN EN TIEMPO REAL ---
+  initSyncMonitor() {
+    const badge = document.getElementById('header-sync-status');
+    if (!badge) return;
+    const textEl = badge.querySelector('.live-sync-text');
+
+    const checkServer = async () => {
+      try {
+        const res = await fetch('/health', { cache: 'no-store' });
+        if (res.ok) {
+          badge.classList.remove('sync--offline');
+          if (textEl) textEl.textContent = 'En Vivo';
+        } else {
+          badge.classList.add('sync--offline');
+          if (textEl) textEl.textContent = 'Offline';
+        }
+      } catch {
+        badge.classList.add('sync--offline');
+        if (textEl) textEl.textContent = 'Offline';
+      }
+    };
+
+    checkServer();
+    setInterval(checkServer, 15000);
   }
 
   // --- NAVEGACIÓN ENTRE PESTAÑAS ---
