@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>UFPSO Horarios & Gestión Académica</title>
+  <meta name="description" content="Plataforma académica minimalista y moderna para estudiantes de la UFPSO Ocaña." />
+  <meta name="theme-color" content="#090a0c" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Estilos del Sistema de Diseño -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Barra Superior / Header Institucional Minimalista -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <div class="brand-symbol">
+            <span class="symbol-accent"></span>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">UFPSO</span>
+            <span class="brand-divider">/</span>
+            <span class="brand-sub">Horarios</span>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <div class="live-clock-badge" id="header-live-clock" title="Hora actual del campus">
+            --:--:--
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Selector de Simulación (para pruebas rápidas de clases activas) -->
+          <div class="sim-selector-wrapper" title="Simular día y hora lectiva para comprobar estados">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <select id="sim-time-select" class="sim-select">
+              <option value="real">Hora Real</option>
+              <option value="jueves-0615">Simular Jueves 06:15 (Clase en curso)</option>
+              <option value="jueves-1130">Simular Jueves 11:30 (Entre clases)</option>
+              <option value="lunes-0800">Simular Lunes 08:00 (Inicio de semana)</option>
+              <option value="viernes-1600">Simular Viernes 16:00 (Fin de semana)</option>
+            </select>
+          </div>
+
+          <!-- Botón de Perfil de Estudiante -->
+          <button id="btn-student-profile" class="btn-profile-badge" title="Cambiar código de estudiante">
+            <div class="profile-avatar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="profile-meta">
+              <span id="student-code-badge" class="profile-code">0192977</span>
+              <span id="student-name-badge" class="profile-name">Estudiante</span>
+            </div>
+          </button>
+
+          <!-- Alternador de Modo Oscuro / Claro -->
+          <button id="btn-theme-toggle" class="btn-icon" title="Cambiar tema">
+            <svg class="theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg class="theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Barra de Navegación por Pestañas Minimalista -->
+    <nav class="app-nav">
+      <div class="nav-inner">
+        <button class="nav-tab-btn active" data-tab="today">
+          <span class="tab-label">Hoy</span>
+          <span class="tab-kbd">1</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="week">
+          <span class="tab-label">Semana</span>
+          <span class="tab-kbd">2</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="tasks">
+          <span class="tab-label">Tareas & Cortes</span>
+          <span class="tab-kbd">3</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="campus">
+          <span class="tab-label">Salones</span>
+          <span class="tab-kbd">4</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="import">
+          <span class="tab-label">Importar PDF</span>
+          <span class="tab-kbd">5</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Contenedor Principal de la Vista Activa -->
+    <main id="main-content" class="app-main">
+      <!-- Inyectado por JavaScript modular -->
+    </main>
+
+    <!-- Footer Discreto -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <span>UFPSO Ocaña · Horarios Estudiantiles</span>
+        <span class="footer-sep">·</span>
+        <span>Sincronización Directa Neon PostgreSQL</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal de Cambio de Código / Autenticación -->
+  <div id="auth-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Perfil de Estudiante</h3>
+        <button class="modal-close-btn" id="btn-close-auth-modal">&times;</button>
+      </div>
+      <form id="form-auth-login" class="modal-form">
+        <p class="modal-desc">Ingresa tu código universitario UFPSO para consultar tu horario y tareas sincronizadas.</p>
+        <div class="form-group">
+          <label class="form-label" for="login-student-code">Código Universitario *</label>
+          <input type="text" id="login-student-code" class="form-input" placeholder="Ej. 0192977" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-student-pwd">PIN o Contraseña (opcional)</label>
+          <input type="password" id="login-student-pwd" class="form-input" placeholder="Dejar vacío si no configuraste PIN" />
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Ingresar / Cambiar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contenedor de Toasts / Notificaciones -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Script Modular -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

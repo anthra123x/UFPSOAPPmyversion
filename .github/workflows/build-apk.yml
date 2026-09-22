@@ -1,0 +1,77 @@
+name: Compilar APK Android UFPSO
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Compilar APK Android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Sincronizar Frontend con Assets de Android
+        run: |
+          mkdir -p android/app/src/main/assets/web
+          cp -r frontend/* android/app/src/main/assets/web/
+
+      - name: Permisos de Ejecución a Gradle
+        run: chmod +x android/gradlew
+
+      - name: Compilar APK Release
+        run: |
+          cd android
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Renombrar APK de Salida
+        run: |
+          mkdir -p build-output
+          cp android/app/build/outputs/apk/release/app-release.apk build-output/ufpso-horarios.apk
+
+      - name: Subir APK como Artefacto de GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: ufpso-horarios-apk
+          path: build-output/ufpso-horarios.apk
+
+      - name: Publicar en GitHub Releases
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: v1.0.0
+          name: "UFPSO Horarios v1.0.0 (APK)"
+          body: |
+            ### 🎓 UFPSO Horarios & Gestión Académica v1.0.0
+
+            Instala la aplicación móvil nativa en tu dispositivo Android.
+            
+            #### Novedades:
+            - Interfaz moderna, limpia y minimalista.
+            - Clase activa en tiempo real con cuenta regresiva.
+            - Cuadrícula semanal completa (Lunes a Sábado).
+            - Seguimiento de parciales y notas por 3 cortes académicos.
+            - Buscador predictivo de aulas, bloques y salas del campus El Algodonal.
+            - Importación de horario SIA en 1 clic desde PDF.
+
+            #### 📥 Descarga Directa:
+            Descarga el archivo adjunto `ufpso-horarios.apk` e instálalo en tu celular.
+          draft: false
+          prerelease: false
+          files: build-output/ufpso-horarios.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,123 +1,101 @@
 # 🎓 UFPSO Horarios & Gestión Académica
 
-Plataforma integral y minimalista para estudiantes de la **Universidad Francisco de Paula Santander Seccional Ocaña (UFPSO)**. Permite la importación inteligente del horario desde el portal SIA, visualización en tiempo real de clases y salones enriquecidos (Bloque, Salón, Piso), seguimiento de compromisos académicos por cortes, y directorio predictivo de espacios del campus El Algodonal.
+[![Descargar APK](https://img.shields.io/badge/Descargar%20APK-Android%20v1.0.0-dc2626?style=for-the-badge&logo=android&logoColor=white)](https://github.com/anthra123x/UFPSOAPPmyversion/releases/latest/download/ufpso-horarios.apk)
+[![GitHub Release](https://img.shields.io/github/v/release/anthra123x/UFPSOAPPmyversion?color=10b981&style=for-the-badge)](https://github.com/anthra123x/UFPSOAPPmyversion/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/anthra123x/UFPSOAPPmyversion/build-apk.yml?branch=main&style=for-the-badge&label=APK%20Build)](https://github.com/anthra123x/UFPSOAPPmyversion/actions)
+
+Aplicación móvil y web moderna y minimalista para estudiantes de la **Universidad Francisco de Paula Santander Seccional Ocaña (UFPSO)**.
 
 ---
 
-## 🌟 Características Principales
+## 📱 Descargar e Instalar la App en Android (APK)
 
-### 🖥️ Frontend Moderno & Editorial
-- **Diseño limpio y enfocado**: Sin saturación visual, sin gradientes morados genéricos ni tarjetas infladas con sombras excesivas. Interfaz tipográfica de alta legibilidad basada en *Inter* y números tabulares (`tabular-nums`).
-- **Vista Hoy**: Resalta la clase activa en curso o la próxima clase con cuenta regresiva en minutos (`Termina en 45 min` / `Empieza en 20 min`), junto con la agenda cronológica del día.
-- **Vista Semana**: Cuadrícula horaria completa (Lunes a Sábado de 06:00 a 22:00) y modo agenda por días con conteo de horas semanales.
-- **Seguimiento por Cortes UFPSO**: Organización de parciales, talleres y quizzes clasificados por 1° Corte (35%), 2° Corte (35%) y 3° Corte (30%).
-- **Directorio de Campus El Algodonal**: Buscador en vivo de aulas, bloques y salas de cómputo con resolución automática de códigos (ej. `I102`, `SCIS`, `CDPU`).
-- **Importador de Horario SIA (PDF)**: Arrastrar y soltar con previsualización de 2 pasos para validar materias antes de confirmar la carga.
-- **Modos Oscuro y Claro**: Alternador con persistencia en almacenamiento local.
-- **Arquitectura Cero-Build**: Construido en HTML5 semántico, CSS3 Vanilla y ES Modules nativos servido directamente por el backend.
+Puedes descargar la aplicación directamente a tu teléfono móvil Android:
 
-### ⚡ Backend de Alto Rendimiento
-- **FastAPI**: API asíncrona de baja latencia con documentación automática OpenAPI en `/docs`.
-- **Base de Datos en la Nube**: Integración con PostgreSQL serverless (Neon) mediante SQLAlchemy 2.0 Async + asyncpg.
-- **Parser Inteligente de PDFs**: Extracción y reconciliación de tablas de horario del sistema SIA institucional (`pdfplumber` + `pypdf`).
-- **Catálogo de Salones**: Mapeo y enriquecimiento semántico de códigos de espacio a bloques, pisos y facultades de la UFPSO.
-- **Autenticación JWT**: Seguridad con tokens de portador y persistencia de sesión por código estudiantil.
+👉 **[📥 DESCARGAR APK DIRECTO (ufpso-horarios.apk)](https://github.com/anthra123x/UFPSOAPPmyversion/releases/latest/download/ufpso-horarios.apk)**
+
+O explora los paquetes disponibles en **[GitHub Releases](https://github.com/anthra123x/UFPSOAPPmyversion/releases)**.
+
+### 📲 Pasos para instalar en tu celular Android:
+1. Abre este enlace desde tu teléfono o descarga el archivo `ufpso-horarios.apk`.
+2. Al abrirlo, si el sistema lo solicita, activa el permiso de **"Instalar aplicaciones desconocidas"** para tu navegador (Chrome, Firefox o Descargas).
+3. Presiona **Instalar** y ¡listo! Ya puedes acceder a tu horario y salones sin fricción.
 
 ---
 
-## 📁 Estructura del Proyecto
+## 🌟 Características de la Aplicación
+
+### 🖥️ Interfaz Moderna & Minimalista
+- **Diseño sin saturación**: Cero tarjetas infladas, sin gradientes morados chillones ni widgets de relleno. Tipografía *Inter* de alta legibilidad con números tabulares (`tabular-nums`).
+- **Vista Hoy**: Muestra la clase en curso o la próxima con cuenta regresiva en minutos (`Termina en 45 min` / `Empieza en 20 min`), profesor y ubicación física enriquecida (`Bloque I · Salón 102 · Piso 1`).
+- **Vista Semana**: Cuadrícula horaria completa de Lunes a Sábado (06:00 a 22:00) y vista en lista organizada por días.
+- **Seguimiento de Cortes UFPSO**: Control de parciales, talleres y quizzes organizados por los 3 cortes académicos (35%, 35%, 30%) con casillas de marcado instantáneo.
+- **Directorio de Campus El Algodonal**: Buscador en vivo de salones, salas de cómputo, laboratorios y auditorios con resolución automática de códigos (ej. `I102`, `SCIS`, `CDPU`).
+- **Importador de Horario SIA (PDF)**: Carga en dos pasos con previsualización inteligente de carga académica antes de sincronizar.
+- **Modos Oscuro y Claro**: Alternador integrado con persistencia local.
+
+### ⚡ Backend & Nube
+- **FastAPI**: API asíncrona de alto rendimiento.
+- **Neon PostgreSQL**: Base de datos serverless en la nube con SQLAlchemy 2.0 Async.
+- **Parser SIA**: Extracción automática de tablas de horario universitario mediante `pdfplumber`.
+- **Integración CI/CD**: Compilación automática de APKs en GitHub Actions en cada actualización.
+
+---
+
+## 📁 Estructura del Repositorio
 
 ```
-apphorario/
-├── backend/
+UFPSOAPPmyversion/
+├── android/                      # Proyecto nativo Android (Gradle + Kotlin)
+│   ├── app/                      # Módulo de la app (MainActivity, WebView nativo, recursos)
+│   │   ├── src/main/AndroidManifest.xml
+│   │   └── src/main/java/com/ufpso/horarios/MainActivity.kt
+│   ├── build.gradle.kts
+│   └── gradlew                   # Wrapper de Gradle
+├── backend/                      # API REST asíncrona en Python
 │   ├── app/
-│   │   ├── config.py             # Configuración central y variables de entorno
-│   │   ├── database.py           # Conexión asíncrona a Neon PostgreSQL
-│   │   ├── main.py               # Aplicación FastAPI y montaje de frontend
-│   │   ├── models/               # Modelos de base de datos (Estudiantes, Materias, Horarios, Tareas)
-│   │   ├── routers/              # Endpoints: auth, schedule, tasks, campus
-│   │   ├── schemas/              # Validación de datos y DTOs con Pydantic V2
-│   │   └── services/             # Lógica de negocio (PDF parser, catálogo salones, schedule)
-│   ├── tests/                    # Suite de pruebas unitarias y de integración
+│   │   ├── config.py             # Configuración y conexión Neon DB
+│   │   ├── database.py           # Conexión SQLAlchemy async
+│   │   ├── main.py               # Servidor FastAPI
+│   │   ├── models/               # Modelos relacionales
+│   │   ├── routers/              # Rutas /api/v1 (auth, schedule, tasks, campus)
+│   │   ├── schemas/              # Validación Pydantic V2
+│   │   └── services/             # Lógica de negocio y parser PDF
 │   ├── requirements.txt          # Dependencias Python
-│   └── Dockerfile                # Empaquetado para despliegue
-├── frontend/
-│   ├── index.html                # Estructura principal y navegación
-│   ├── css/
-│   │   └── style.css             # Sistema de diseño minimalista (variables, temas, componentes)
+│   └── Dockerfile
+├── frontend/                     # Aplicación Web moderna (HTML5, CSS3, ES Modules)
+│   ├── index.html
+│   ├── css/style.css             # Sistema de diseño minimalista UFPSO
 │   └── js/
-│       ├── api.js                # Cliente REST con token JWT
-│       ├── app.js                # Controlador principal y simulador
-│       └── components/           # Módulos de vistas (today, week, tasks, campus, import)
+│       ├── api.js                # Cliente REST
+│       ├── app.js                # Controlador principal
+│       └── components/           # Vistas (today, week, tasks, campus, import)
+├── .github/workflows/
+│   └── build-apk.yml             # Workflow de compilación automática del APK
 ├── start.sh                      # Script de arranque en 1 clic
-└── pytest.ini                    # Configuración de pruebas
+└── README.md                     # Documentación principal
 ```
 
 ---
 
-## 🚀 Inicio Rápido (Local)
+## 🚀 Cómo ejecutar en desarrollo local
 
-### 1. Requisitos Previos
-- Python 3.10 o superior instalado.
-
-### 2. Configurar Variables de Entorno
-Copia el archivo de ejemplo en `backend/.env`:
-```bash
-cp backend/.env.example backend/.env
-```
-*(Asegúrate de configurar `DATABASE_URL` con tu cadena de conexión PostgreSQL de Neon o local).*
-
-### 3. Ejecutar el Servidor
-Ejecuta el script unificado de inicio:
+### 1. Iniciar Servidor (Backend + Frontend Web)
 ```bash
 ./start.sh
 ```
-El script creará automáticamente el entorno virtual `.venv` si no existe, instalará las dependencias necesarias y levantará el servidor en:
-👉 **http://localhost:8000**
+Abre en tu navegador: **http://localhost:8000**
 
----
-
-## 📱 Cómo Probar la App en tu Celular / Dispositivo Móvil
-
-La aplicación está diseñada con un diseño 100% responsivo para pantallas móviles. Para abrirla desde tu celular o tablet:
-
-### Método 1: En la misma red Wi-Fi (Recomendado)
-
-1. Conecta tu celular a la **misma red Wi-Fi** donde está tu computador.
-2. Consulta la dirección IP local de tu computador. En Linux:
-   ```bash
-   ip route get 1.1.1.1 | awk '{print $7}'
-   # Ejemplo de IP obtenida: 10.81.48.45
-   ```
-3. En el navegador de tu teléfono (Chrome, Safari o Firefox), ingresa la dirección con el puerto `8000`:
-   ```
-   http://TU_IP_LOCAL:8000
-   # Ejemplo: http://10.81.48.45:8000
-   ```
-4. *(Opcional)* Si tu sistema tiene firewall activo (UFW), asegúrate de permitir el puerto:
-   ```bash
-   sudo ufw allow 8000/tcp
-   ```
-
-### Método 2: Instalar como Web App en la Pantalla de Inicio
-Una vez abras la página en el navegador de tu teléfono:
-- **Android (Chrome)**: Pulsa el menú de 3 puntos `⋮` y selecciona **"Agregar a la pantalla principal"** / **"Instalar aplicación"**.
-- **iOS (Safari)**: Pulsa el botón de compartir y selecciona **"Agregar al inicio"**.
-Tendrás un acceso directo nativo a pantalla completa sin barra de navegador.
-
-### Método 3: Probar fuera de tu casa (Túnel Cloudflare / Ngrok)
-Si quieres probar la app cuando estés en la universidad usando datos móviles:
-```bash
-# Con Cloudflare (rápido, sin registro previo):
-npx cloudflared tunnel --url http://localhost:8000
+### 2. Probar en Dispositivos en la Misma Red Wi-Fi
+Conecta tu celular a la misma red Wi-Fi e ingresa la IP local de tu equipo:
 ```
-Te entregará un enlace HTTPS seguro temporal (ej. `https://xxxx.trycloudflare.com`) para abrir desde cualquier lugar del mundo.
+http://TU_IP_LOCAL:8000
+```
 
 ---
 
 ## 🧪 Pruebas Automatizadas
 
-Para ejecutar la suite de pruebas unitarias y de integración:
 ```bash
 .venv/bin/python -m pytest backend/tests/
 ```
@@ -126,7 +104,6 @@ Para ejecutar la suite de pruebas unitarias y de integración:
 
 ## 📖 Documentación de la API
 
-FastAPI genera documentación interactiva en tiempo real:
 - **Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 

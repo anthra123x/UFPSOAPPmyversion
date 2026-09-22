@@ -1,0 +1,7 @@
+<resources>
+    <color name="ufpso_red">#DC2626</color>
+    <color name="ufpso_red_dark">#B91C1C</color>
+    <color name="bg_dark">#090A0C</color>
+    <color name="surface_dark">#13161C</color>
+    <color name="white">#FFFFFF</color>
+</resources>
