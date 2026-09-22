@@ -10,11 +10,11 @@ Aplicación móvil y web moderna y minimalista para estudiantes de la **Universi
 
 ## 📱 Descargar e Instalar la App en Android (APK)
 
-Puedes descargar la aplicación directamente a tu teléfono móvil Android:
+El archivo APK ya se encuentra compilado y disponible directamente en este repositorio:
 
-👉 **[📥 DESCARGAR APK DIRECTO (ufpso-horarios.apk)](https://github.com/anthra123x/UFPSOAPPmyversion/releases/latest/download/ufpso-horarios.apk)**
-
-O explora los paquetes disponibles en **[GitHub Releases](https://github.com/anthra123x/UFPSOAPPmyversion/releases)**.
+- 👉 **[📥 DESCARGAR APK DIRECTO (Desde el Repositorio)](https://github.com/anthra123x/UFPSOAPPmyversion/raw/main/ufpso-horarios.apk)** *(Recomendado, descarga inmediata)*
+- 🏷️ **[Descargar desde GitHub Releases (v1.0.0)](https://github.com/anthra123x/UFPSOAPPmyversion/releases/latest/download/ufpso-horarios.apk)**
+- 📁 O localmente en el archivo del repositorio: [`ufpso-horarios.apk`](./ufpso-horarios.apk)
 
 ### 📲 Pasos para instalar en tu celular Android:
 1. Abre este enlace desde tu teléfono o descarga el archivo `ufpso-horarios.apk`.
