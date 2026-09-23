@@ -205,7 +205,7 @@ class App {
         codeInput.value = current.code;
       }
       if (urlInput) {
-        urlInput.value = localStorage.getItem('ufpso_api_base') || 'http://10.81.48.45:8000/api/v1';
+        urlInput.value = localStorage.getItem('ufpso_api_base') || 'http://10.80.85.104:8000/api/v1';
       }
       modal.classList.remove('hidden');
     };

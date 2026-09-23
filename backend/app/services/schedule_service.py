@@ -367,8 +367,10 @@ async def get_week_schedule(
         days=days_list
     )
     
-    # Guardar en micro-caché por 300 segundos
-    cache.set(cache_key, week_out, ttl_seconds=300)
+    # Guardar en micro-caché por 60 segundos (antes 300s) para que los cambios
+    # en el horario (nuevo PDF SIA, ediciones desde otro dispositivo) se reflejen
+    # en la app en tiempo real sin esperar 5 minutos.
+    cache.set(cache_key, week_out, ttl_seconds=60)
     return week_out
 
 def _time_to_minutes(t_str: str) -> int:

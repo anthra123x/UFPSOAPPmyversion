@@ -17,7 +17,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
 
-    private val liveServerUrl = "http://10.81.48.45:8000/"
+    // IMPORTANTE: esta IP debe coincidir con la IP LAN actual de la máquina que ejecuta ./start.sh
+    // (se puede obtener con `ip -4 addr`). Si se despliega el backend en un dominio/URL pública,
+    // reemplázala por esa URL (ej: "https://api.midominio.com/").
+    private val liveServerUrl = "http://10.80.85.104:8000/"
     private val localFallbackUrl = "https://appassets.androidplatform.net/assets/web/index.html"
     private var isUsingFallback = false
 
@@ -76,6 +79,19 @@ class MainActivity : AppCompatActivity() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     swipeRefresh.isRefreshing = false
+
+                    // Al cargar el fallback empaquetado, inyectar la base de la API apuntando al
+                    // mismo servidor que se intentó cargar, para que el bundle pueda consumir datos
+                    // si el servidor sí es alcanzable (misma red). Si el usuario configuró una URL
+                    // personalizada en el modal, se respeta (localStorage ya tiene prioridad).
+                    if (isUsingFallback) {
+                        webView.evaluateJavascript(
+                            "if(!localStorage.getItem('ufpso_api_base')){" +
+                                "localStorage.setItem('ufpso_api_base','" + liveServerUrl + "api/v1'" +
+                                ");console.log('[UFPSO] api_base inyectado: " + liveServerUrl + "api/v1');}",
+                            null
+                        )
+                    }
                 }
 
                 override fun onReceivedError(
@@ -85,12 +101,27 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     super.onReceivedError(view, request, error)
                     swipeRefresh.isRefreshing = false
-                    // Si el servidor en vivo no responde (ej. sin red local), cargar fallback local empaquetado
+
+                    // Solo saltar al fallback si falla la CARGA PRINCIPAL de la página.
+                    // Los errores de subrecursos (fetch a /api/v1/*, css, js, fuentes) NO deben
+                    // cambiar la interfaz: un fallo transitorio de red provocaba que la app
+                    // "retrocediera" a la UI vieja empaquetada, y los cambios en tiempo real
+                    // parecían no aplicarse.
                     val failingUrl = request?.url?.toString() ?: ""
-                    if (!isUsingFallback && failingUrl.startsWith(liveServerUrl)) {
+                    if (!isUsingFallback && request?.isForMainFrame == true && failingUrl.startsWith(liveServerUrl)) {
                         isUsingFallback = true
                         webView.loadUrl(localFallbackUrl)
                     }
+                }
+
+                // Los errores HTTP (4xx/5xx) tampoco deben disparar el fallback.
+                override fun onReceivedHttpError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    errorResponse: WebResourceResponse?
+                ) {
+                    super.onReceivedHttpError(view, request, errorResponse)
+                    swipeRefresh.isRefreshing = false
                 }
             }
 
@@ -116,7 +147,12 @@ class MainActivity : AppCompatActivity() {
         swipeRefresh.addView(webView)
         swipeRefresh.setOnRefreshListener {
             isUsingFallback = false
+            // Limpiar caché HTTP del WebView para que el pull-to-refresh SIEMPRE traiga
+            // el frontend y los datos más recientes (tiempo real).
+            webView.clearCache(true)
+            webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
             webView.loadUrl(liveServerUrl)
+            webView.settings.cacheMode = WebSettings.LOAD_DEFAULT
         }
 
         setContentView(swipeRefresh)

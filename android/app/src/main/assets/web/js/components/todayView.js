@@ -8,9 +8,12 @@ import { api } from '../api.js';
 export const TodayView = {
   containerId: 'view-today',
   timerInterval: null,
+  autoRefreshInterval: null,
   currentScheduleData: null,
 
   async render(container, simParams = {}) {
+    // Limpiar auto-refresh previo si la vista se vuelve a renderizar
+    this.stopAutoRefresh();
     container.innerHTML = `
       <div class="view-header">
         <div>
@@ -58,8 +61,18 @@ export const TodayView = {
     const dateStr = container.querySelector('#today-date-str');
     const countBadge = container.querySelector('#today-classes-count');
 
-    // 1. Mostrar caché instantánea (0ms) si existe y no estamos simulando
+    // Reiniciar auto-revalidación en tiempo real (cada 60s, solo en modo real)
+    this.stopAutoRefresh();
     const isSimulating = simParams.weekday !== null || simParams.timeSim;
+    if (!isSimulating) {
+      this.autoRefreshInterval = setInterval(() => {
+        this.load(container, simParams).catch(() => {});
+      }, 60000);
+    } else {
+      this.stopAutoRefresh();
+    }
+
+    // 1. Mostrar caché instantánea (0ms) si existe y no estamos simulando
     if (!isSimulating) {
       const cached = api.getCachedToday();
       if (cached) {
@@ -269,5 +282,12 @@ export const TodayView = {
     }).join('');
 
     container.innerHTML = itemsHtml;
+  },
+
+  stopAutoRefresh() {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
+      this.autoRefreshInterval = null;
+    }
   }
 };

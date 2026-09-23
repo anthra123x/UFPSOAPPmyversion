@@ -11,7 +11,9 @@ export const getApiBase = () => {
       !window.location.hostname.includes('androidplatform.net')) {
     return `${window.location.origin}/api/v1`;
   }
-  return 'http://10.81.48.45:8000/api/v1';
+  // En el fallback empaquetado del APK, la base la inyecta MainActivity vía localStorage
+  // (ufpso_api_base) o la configura el usuario en el modal. Este valor es solo el último recurso.
+  return 'http://10.80.85.104:8000/api/v1';
 };
 
 const TOKEN_STORAGE_KEY = 'ufpso_auth_token';

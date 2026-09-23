@@ -1,6 +1,9 @@
+import asyncio
+import logging
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from datetime import datetime, timezone
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -9,13 +12,30 @@ from app.database import engine, Base
 from app.routers import auth, schedule, tasks, campus
 import app.models # Ensure all models are registered with Base.metadata
 
+logger = logging.getLogger("uvicorn.error")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Inicializa la base de datos creando las tablas necesarias en Neon PostgreSQL."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    """
+    Inicializa las tablas en Neon PostgreSQL SIN bloquear el arranque del servidor.
+    Si la base de datos está momentáneamente inalcanzable (serverless cold start,
+    caída de red), el API arranca igualmente y reintenta de forma perezosa en el
+    primer request real que use la base de datos.
+    """
+    try:
+        await asyncio.wait_for(
+            _create_tables(),
+            timeout=10,
+        )
+        logger.info("Database connected and tables ensured on startup.")
+    except (asyncio.TimeoutError, Exception) as e:  # noqa: BLE001 - arranque resiliente
+        logger.warning("Database not reachable at startup (%s). API will start anyway.", type(e).__name__)
     yield
     await engine.dispose()
+
+async def _create_tables() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 app = FastAPI(
     title="UFPSO Horarios & Gestión Académica API",
@@ -39,6 +59,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def no_cache_api_responses(request: Request, call_next):
+    """
+    Evita que el WebView Android (o cualquier proxy/cliente) cachee respuestas de la API.
+    Sin esta cabecera, GET /api/* pueden servirse de la caché HTTP del WebView y
+    los cambios en tiempo real (nuevo PDF, tareas, horario) no se reflejan.
+    Los estáticos del frontend (css/js) SÍ conservan revalidación ETag.
+    """
+    response = await call_next(request)
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
 # Inclusión de routers bajo el prefijo unificado /api/v1
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(schedule.router, prefix="/api/v1")
@@ -61,6 +95,32 @@ async def api_info():
         "version": "1.0.0",
         "docs": "/docs",
         "redoc": "/redoc"
+    }
+
+@app.get("/api/config", tags=["General"])
+async def api_config(request: Request):
+    """
+    Contrato de descubrimiento dinámico para clientes (APK Android / Web).
+
+    Permite que la app obtenga la URL correcta del backend sin IPs hardcodeadas
+    y ajuste su comportamiento de caché/tiempo real según el servidor.
+    """
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("host", request.url.netloc)
+    server_origin = f"{scheme}://{host}"
+    return {
+        "app": "UFPSO Horarios & Gestión Académica API",
+        "status": "online",
+        "version": "1.0.0",
+        "api_base": "/api/v1",
+        "server_origin": server_origin,
+        "server_time": datetime.now(timezone.utc).isoformat(),
+        "cache": {
+            "today_ttl_seconds": 30,
+            "week_ttl_seconds": 60,
+        },
+        "cors": settings.CORS_ORIGINS,
+        "docs": "/docs",
     }
 
 # Servir Frontend
